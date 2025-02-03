@@ -124,6 +124,7 @@ const COST: string[] = [
   "<:cost9:1319064949376684102>",
   "<:cost10:1319064958868394014>",
   "<:cost11:1319064974177337374>",
+  "<:cost12:1336054319698542702>",
 ];
 
 function getRecycle(recycle: RecycleColor[]) {
