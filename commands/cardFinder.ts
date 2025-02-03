@@ -33,13 +33,15 @@ export default {
       if (!cards.miss && cards.cards.length > 0) {
         const options: SelectMenuComponentOptionData[] = cards.cards.map(
           (card) => {
+            const set = getCollectionId(
+              card.set_index,
+              card.set_code,
+              card.set_total
+            );
+
             return {
               label: card.name,
-              description: getCollectionId(
-                card.set_index,
-                card.set_code,
-                card.set_total
-              ),
+              description: `${card.type}, ${set}`,
               value: `${card.id}`,
             };
           }
