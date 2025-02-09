@@ -46,7 +46,7 @@ BEGIN
         LEFT JOIN artists a on a.id = c.artist_id
         LEFT JOIN media m on m.id = c.card_art_id
         GROUP BY c.id, c.name, s.set_code, s.total, a.name, m.filename
-        HAVING to_tsvector('english', c.full_card_name || ' ' || c.abilities_text) @@ to_tsquery(search_query || ':*')
+        HAVING to_tsvector('english', c.full_card_name || ' ' || c.abilities_text) @@ to_tsquery(search_query)
     )
     SELECT 
         cm.id,
