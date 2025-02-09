@@ -43,7 +43,10 @@ const toCardSearchResult = (data: CardSearchQuery): CardSearchResult => {
 export async function getCardsFromName(name: string): Promise<CardsResponse> {
   const client = SupabaseClient();
 
-  const nameParts = name.split(" ").map((part) => `'${part}'`);
+  const nameParts = name
+    .replace("'", "")
+    .split(" ")
+    .map((part) => `${part}:*`);
   const nameSearch = nameParts.join(" & ");
 
   const { data, error } = await client.rpc("search_cards_using_name_text", {

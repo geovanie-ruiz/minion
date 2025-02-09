@@ -2,7 +2,7 @@ import { EmbedBuilder } from "@discordjs/builders";
 import type { APIEmbedField } from "discord.js";
 import process from "process";
 import { getCardsFromName } from "../api/cards";
-import type { CardSearchResult } from "../api/types";
+import type { CardSearchResult, Keyword } from "../api/types";
 import {
   getAbilitiesText,
   getCardTypeField,
@@ -13,38 +13,92 @@ import {
   getRuneField,
   MatchType,
 } from "../utils";
+import type { CardType, Color } from "../utils/supabase/tables.types";
+
+type CardProps = {
+  runes: Color[];
+  type: CardType;
+  abilities: string;
+  keywords: Keyword[];
+  tags: string[];
+  set: {
+    index: number;
+    code: string;
+    total: number;
+  };
+  rarity: string;
+  artist: string;
+};
+
+const getTags = (tags: string[]) => {
+  if (tags.length === 0) return "---";
+  return tags.join(", ");
+};
+
+const getFields = ({
+  runes,
+  type,
+  abilities,
+  keywords,
+  tags,
+  set,
+  rarity,
+  artist,
+}: CardProps): APIEmbedField[] => {
+  const cardTags = getTags(tags);
+  const abilitiesText = getAbilitiesText(abilities, keywords);
+  const fields: APIEmbedField[] = [];
+
+  if (runes.length > 0) {
+    fields.push({
+      name: "Rune",
+      value: `${getRuneField(runes)}`,
+      inline: true,
+    });
+  }
+
+  fields.push({
+    name: "Type",
+    value: `${getCardTypeField(type, runes)}`,
+    inline: true,
+  });
+
+  fields.push({ name: "Abilities", value: abilitiesText, inline: false });
+  fields.push({ name: "Tags", value: cardTags, inline: false });
+  fields.push({
+    name: "Set",
+    value: `${getCollectionId(set.index, set.code, set.total)} ‧ EN`, // set should have language
+    inline: true,
+  });
+  fields.push({
+    name: "Rarity",
+    value: `${getRarityField(rarity)}`,
+    inline: true,
+  });
+  fields.push({
+    name: "Artist",
+    value: `${artist || "Artist Unknown"}`,
+    inline: true,
+  });
+
+  return fields;
+};
 
 export function embedCard(card: CardSearchResult): EmbedBuilder {
-  let cardTags = "---";
-  if (card.tags.length > 0) cardTags = card.tags.join(", ");
-
-  const abilitiesText = getAbilitiesText(card.abilities_markup, card.keywords);
-
-  const fields: APIEmbedField[] = [
-    { name: "Rune", value: `${getRuneField(card.runes)}`, inline: true },
-    {
-      name: "Type",
-      value: `${getCardTypeField(card.type, card.runes)}`,
-      inline: true,
+  const cardProps = {
+    runes: card.runes,
+    type: card.type,
+    abilities: card.abilities_markup,
+    keywords: card.keywords,
+    tags: card.tags,
+    set: {
+      index: card.set_index,
+      code: card.set_code,
+      total: card.set_total,
     },
-    { name: "Abilities", value: abilitiesText, inline: false },
-    { name: "Tags", value: cardTags, inline: false },
-    {
-      name: "Set",
-      value: `${getCollectionId(
-        card.set_index,
-        card.set_code,
-        card.set_total
-      )} ‧ EN`, // set should have language
-      inline: true,
-    },
-    { name: "Rarity", value: `${getRarityField(card.rarity)}`, inline: true },
-    {
-      name: "Artist",
-      value: `${card.artist_name || "Artist Unknown"}`,
-      inline: true,
-    },
-  ];
+    rarity: card.rarity,
+    artist: card.artist_name,
+  };
 
   return new EmbedBuilder()
     .setColor(getColor(card.runes))
@@ -58,7 +112,7 @@ export function embedCard(card: CardSearchResult): EmbedBuilder {
         card.might ?? null
       )
     )
-    .addFields(...fields)
+    .addFields(...getFields(cardProps))
     .setThumbnail(`${process.env.CLOUDINARY_HOST}/${card.art_public_id}`)
     .setTimestamp()
     .setFooter({
