@@ -1582,6 +1582,7 @@ export type Database = {
           recycle_serial: string
           keywords: Json
           tags: string[]
+          flavor: string
         }[]
       }
       search_cards_using_name_text: {
@@ -1605,6 +1606,7 @@ export type Database = {
           recycle_serial: string
           keywords: Json
           tags: string[]
+          flavor: string
         }[]
       }
     }

@@ -32,6 +32,7 @@ export type CardSearchQuery = {
   recycle_serial: string;
   keywords: Json;
   tags: string[];
+  flavor: string;
 };
 
 export type CardSearchResult = {
@@ -51,6 +52,7 @@ export type CardSearchResult = {
   recycle_serial: RecycleColor[];
   keywords: Keyword[];
   tags: string[];
+  flavor: string;
 };
 
 export type CardsResponse = {
