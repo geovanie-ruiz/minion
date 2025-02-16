@@ -28,6 +28,7 @@ type CardProps = {
   };
   rarity: string;
   artist: string;
+  flavor: string;
 };
 
 const getTags = (tags: string[]) => {
@@ -44,6 +45,7 @@ const getFields = ({
   set,
   rarity,
   artist,
+  flavor,
 }: CardProps): APIEmbedField[] => {
   const cardTags = getTags(tags);
   const abilitiesText = getAbilitiesText(abilities, keywords);
@@ -62,8 +64,9 @@ const getFields = ({
     value: `${getCardTypeField(type, runes)}`,
     inline: true,
   });
-
   fields.push({ name: "Abilities", value: abilitiesText, inline: false });
+  if (flavor !== "")
+    fields.push({ name: "Flavor", value: `>>> ${flavor}`, inline: false });
   fields.push({ name: "Tags", value: cardTags, inline: false });
   fields.push({
     name: "Set",
@@ -98,6 +101,7 @@ export function embedCard(card: CardSearchResult): EmbedBuilder {
     },
     rarity: card.rarity,
     artist: card.artist_name,
+    flavor: card.flavor,
   };
 
   return new EmbedBuilder()

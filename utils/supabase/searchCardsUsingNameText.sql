@@ -15,7 +15,8 @@ RETURNS TABLE (
     runes TEXT[],
     recycle_serial VARCHAR,
     keywords JSON,
-    tags TEXT[]
+    tags TEXT[],
+    flavor VARCHAR
 ) AS $$
 BEGIN
     RETURN QUERY
@@ -36,7 +37,8 @@ BEGIN
             ARRAY_AGG(DISTINCT r.value::TEXT) FILTER (WHERE r.value IS NOT NULL) as runes,
             c.recycle_serial,
             JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('keyword', k.keyword, 'type', k.type, 'text', k.reminder_markup, 'position', k.position)) FILTER (WHERE k.keyword IS NOT NULL) as keywords,
-            ARRAY_AGG(DISTINCT t.tag::TEXT) FILTER (WHERE t.tag IS NOT NULL) as tags
+            ARRAY_AGG(DISTINCT t.tag::TEXT) FILTER (WHERE t.tag IS NOT NULL) as tags,
+            c.flavor
         FROM cards c
         LEFT JOIN cards_rels cr ON c.id = cr.parent_id
         LEFT JOIN keywords k ON cr.keywords_id = k.id
@@ -64,7 +66,8 @@ BEGIN
         COALESCE(cm.runes, ARRAY[]::TEXT[]) as runes,
         cm.recycle_serial,
         COALESCE(cm.keywords, '[]'::JSON) as keywords,
-        COALESCE(cm.tags, ARRAY[]::TEXT[]) as tags
+        COALESCE(cm.tags, ARRAY[]::TEXT[]) as tags,
+        cm.flavor
     FROM card_metadata cm;
 END;
 $$ LANGUAGE plpgsql;
